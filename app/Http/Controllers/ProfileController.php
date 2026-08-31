@@ -1,0 +1,83 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+
+/**
+ * PROFIL - dipakai ADMIN dan USER.
+ */
+class ProfileController extends Controller
+{
+    public function show()
+    {
+        $user = Auth::user()->load('anggota');
+
+        return view('profile.index', compact('user'));
+    }
+
+    public function edit()
+    {
+        $user = Auth::user()->load('anggota');
+
+        return view('profile.edit', compact('user'));
+    }
+
+    public function update(Request $request)
+    {
+        $user = Auth::user();
+
+        $data = $request->validate([
+            'nama_lengkap' => 'required|string|max:255',
+            'nis' => 'nullable|string|max:30',
+            'kelas' => 'nullable|string|max:30',
+            'alamat' => 'nullable|string|max:500',
+        ]);
+
+        $user->update([
+            'nama_lengkap' => $data['nama_lengkap'],
+        ]);
+
+        if ($user->anggota) {
+            $user->anggota->update([
+                'nama' => $data['nama_lengkap'],
+                'nis' => $data['nis'] ?? null,
+                'kelas' => $data['kelas'] ?? null,
+                'alamat' => $data['alamat'] ?? null,
+            ]);
+        }
+
+        return redirect()->route('user.profile.index')
+            ->with('success', 'Profil berhasil diperbarui.');
+    }
+
+    public function showChangePassword()
+    {
+        return view('profile.change-password');
+    }
+
+    public function changePassword(Request $request)
+    {
+        $user = Auth::user();
+
+        $data = $request->validate([
+            'current_password' => 'required|string',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        if (! Hash::check($data['current_password'], $user->password)) {
+            return back()->withErrors([
+                'current_password' => 'Password saat ini salah.',
+            ]);
+        }
+
+        $user->update([
+            'password' => Hash::make($data['password']),
+        ]);
+
+        return redirect()->route('user.profile.index')
+            ->with('success', 'Password berhasil diubah.');
+    }
+}
