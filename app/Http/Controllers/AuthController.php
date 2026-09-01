@@ -36,10 +36,36 @@ class AuthController extends Controller
             'password' => $credentials['password'],
         ];
 
-        if (Auth::attempt($attempt, $request->boolean('remember'))) {
+        try {
+            $success = Auth::attempt($attempt, $request->boolean('remember'));
+        } catch (\RuntimeException $e) {
+            // Password di database BUKAN hash Bcrypt (mis. diisi manual via
+            // phpMyAdmin/SQL tanpa Hash::make). Jangan tampilkan error 500;
+            // beri pesan yang jelas dan arahkan perbaiki data di database.
+            return back()->withErrors([
+                'login' => 'Login gagal: data password akun ini di database bukan hash Bcrypt yang valid. '
+                    . 'Perbarui kolom password melalui phpMyAdmin dengan hash dari bcrypt generator '
+                    . 'atau minta admin lain meresetnya via perintah Hash::make().',
+            ])->onlyInput('login');
+        }
+
+        if ($success) {
+            $user = Auth::user();
+
+            // Status akun: kolom status di tabel users (default 'aktif').
+            // Akun non-aktif tidak boleh tetap berada dalam session.
+            if (trim((string) $user->status) !== 'aktif') {
+                Auth::logout();
+                $request->session()->invalidate();
+
+                return back()->withErrors([
+                    'login' => 'Akun Anda tidak aktif. Hubungi administrator perpustakaan.',
+                ])->onlyInput('login');
+            }
+
             $request->session()->regenerate();
 
-            if (Auth::user()->isAdmin()) {
+            if ($user->isAdmin()) {
                 return redirect()->intended(route('admin.dashboard'))
                     ->with('success', 'Selamat datang, Admin!');
             }

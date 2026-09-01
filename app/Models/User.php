@@ -35,10 +35,12 @@ class User extends Authenticatable
 
     /**
      * Cek apakah user ini admin.
+     * Role dibaca dari DATABASE (bukan username tertentu).
+     * Normalisasi huruf besar/kecil agar 'ADMIN'/'Admin' di DB tetap dikenali.
      */
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return strtolower(trim((string) $this->role)) === 'admin';
     }
 
     /**
