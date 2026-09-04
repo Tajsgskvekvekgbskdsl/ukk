@@ -6,7 +6,6 @@ use App\Models\Anggota;
 use App\Models\Buku;
 use App\Models\Transaksi;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -24,9 +23,11 @@ class PeminjamanController extends Controller
      */
     public function index()
     {
-        $anggota = Auth::user()->anggota;
+        $anggota = $this->authUser()->anggota;
 
-        $peminjamans = collect();
+        // Paginator KOSONG (bukan collect()) — view memanggil firstItem()/links()
+        // yang hanya ada pada Paginator, bukan Collection.
+        $peminjamans = Transaksi::whereRaw('1 = 0')->paginate(10);
 
         if ($anggota) {
             $peminjamans = Transaksi::with(['buku', 'anggota'])
@@ -48,7 +49,7 @@ class PeminjamanController extends Controller
             'id_buku' => 'required|integer|exists:buku,id_buku',
         ]);
 
-        $user = Auth::user();
+        $user = $this->authUser();
 
         // Transaksi WAJIB memakai anggota milik user yang sedang login.
         // Input id_anggota dari luar DIABAIKAN total.

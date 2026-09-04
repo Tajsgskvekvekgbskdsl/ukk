@@ -1,12 +1,12 @@
 @extends('layouts.site')
 
-@section('title', 'Tentang Perpustakaan')
+@section('title', 'Tentang SMK Muhammadiyah 2 Bantul')
 
 @section('content')
     <header class="page-header">
         <div class="site-container">
-            <h1><i class="bi bi-info-circle me-2" style="color:#16C94A;"></i>Tentang Perpustakaan Sekolah</h1>
-            <p>Pusat sumber belajar untuk seluruh siswa dan guru.</p>
+            <h1><i class="bi bi-info-circle me-2" style="color:#16C94A;"></i>Tentang SMK Muhammadiyah 2 Bantul</h1>
+            <p>Sekolah kejuruan swasta di Kabupaten Bantul, Daerah Istimewa Yogyakarta.</p>
         </div>
     </header>
 
@@ -14,9 +14,14 @@
         <div class="card mb-4" style="box-shadow: var(--shadow-halus);">
             <div class="card-body p-4 p-md-5">
                 <p class="mb-0" style="font-size:1.02rem; max-width: 820px;">
-                    Perpustakaan sekolah adalah pusat sumber belajar yang melayani seluruh siswa, guru,
-                    dan tenaga kependidikan. Koleksi kami mencakup buku pelajaran, fiksi, teknologi,
-                    dan referensi umum untuk mendukung proses belajar mengajar serta menumbuhkan minat baca.
+                    SMK Muhammadiyah 2 Bantul (SMK Mudaba) merupakan sekolah kejuruan swasta di
+                    Kabupaten Bantul, Daerah Istimewa Yogyakarta yang bernaung di bawah Pimpinan
+                    Wilayah Muhammadiyah Provinsi DIY. Sekolah menyelenggarakan pendidikan kejuruan
+                    dengan pengembangan kompetensi, karakter, dan kesiapan peserta didik menghadapi
+                    dunia kerja serta era digital. Perpustakaan sekolah menjadi pusat sumber belajar
+                    yang melayani seluruh siswa, guru, dan tenaga kependidikan — koleksi buku pelajaran,
+                    fiksi, teknologi, dan referensi umum tersedia lewat katalog daring pada website ini
+                    untuk mendukung proses belajar mengajar serta menumbuhkan minat baca.
                 </p>
             </div>
         </div>

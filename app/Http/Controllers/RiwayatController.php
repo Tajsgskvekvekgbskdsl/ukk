@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Transaksi;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * HISTORY MILIK USER SENDIRI.
@@ -16,13 +15,16 @@ class RiwayatController extends Controller
      */
     public function index(Request $request)
     {
-        $anggota = Auth::user()->anggota;
+        $anggota = $this->authUser()->anggota;
 
         $search = trim((string) $request->input('search'));
         $status = trim((string) $request->input('status'));
 
         $dasar = Transaksi::query()
+            // KEAMANAN: user tanpa anggota TIDAK BOLEH melihat transaksi
+            // milik orang lain — paksa hasil kosong.
             ->when($anggota, fn ($q) => $q->where('id_anggota', $anggota->id_anggota))
+            ->when(! $anggota, fn ($q) => $q->whereRaw('1 = 0'))
             ->when($search !== '', function ($q) use ($search) {
                 $q->whereHas('buku', function ($w) use ($search) {
                     $w->where('judul_buku', 'like', "%{$search}%")

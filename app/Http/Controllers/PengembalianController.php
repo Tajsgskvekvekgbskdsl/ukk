@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Buku;
 use App\Models\Transaksi;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -22,9 +21,11 @@ class PengembalianController extends Controller
      */
     public function index()
     {
-        $anggota = Auth::user()->anggota;
+        $anggota = $this->authUser()->anggota;
 
-        $pengembalians = collect();
+        // Paginator KOSONG (bukan collect()) — view memanggil firstItem()/links()
+        // yang hanya ada pada Paginator, bukan Collection.
+        $pengembalians = Transaksi::whereRaw('1 = 0')->paginate(10);
 
         if ($anggota) {
             $pengembalians = Transaksi::with('buku')
@@ -42,7 +43,7 @@ class PengembalianController extends Controller
      */
     public function store(Request $request, Transaksi $transaksi)
     {
-        $user = Auth::user();
+        $user = $this->authUser();
 
         // Hanya pemilik transaksi yang boleh mengembalikan.
         if (! $user->anggota || (int) $transaksi->id_anggota !== (int) $user->anggota->id_anggota) {

@@ -1,81 +1,224 @@
-@extends('layouts.app')
+<?php
 
-@section('title', 'Tambah Buku')
-@section('page-title', 'Tambah Buku')
+namespace App\Http\Controllers;
 
-@section('content')
-<div class="row justify-content-center">
-    <div class="col-md-9 col-lg-7">
-        <div class="card">
-            <div class="card-header">Form Tambah Buku</div>
-            <div class="card-body">
-                @if($errors->any())
-                    <div class="alert alert-danger small">
-                        <ul class="mb-0">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
-                    </div>
-                @endif
+use App\Models\Buku;
+use Cloudinary\Cloudinary;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
-                <form method="POST" action="{{ route('admin.buku.store') }}" enctype="multipart/form-data">
-                    @csrf
-                    <div class="mb-3">
-                        <label class="form-label">Judul Buku <span class="text-danger">*</span></label>
-                        <input type="text" name="judul_buku" value="{{ old('judul_buku') }}"
-                            class="form-control @error('judul_buku') is-invalid @enderror" required>
-                        @error('judul_buku')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Pengarang <span class="text-danger">*</span></label>
-                            <input type="text" name="pengarang" value="{{ old('pengarang') }}"
-                                class="form-control @error('pengarang') is-invalid @enderror" required>
-                            @error('pengarang')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Penerbit</label>
-                            <input type="text" name="penerbit" value="{{ old('penerbit') }}" class="form-control">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Tahun Terbit</label>
-                            <input type="number" name="tahun_terbit" value="{{ old('tahun_terbit') }}" min="1900"
-                                max="{{ date('Y') }}" class="form-control">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Kategori</label>
-                            <input type="text" name="kategori" value="{{ old('kategori') }}"
-                                placeholder="Contoh: Teknologi, Fiksi, Pelajaran" class="form-control">
-                        </div>
-                                                <div class="col-md-6">
-                            <label class="form-label">Stok <span class="text-danger">*</span></label>
-                            <input type="number" name="stok" value="{{ old('stok', 0) }}" min="0"
-                                class="form-control @error('stok') is-invalid @enderror" required>
-                            @error('stok')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Cover Buku</label>
-                            <input type="file" name="gambar" accept="image/jpeg,image/png,image/webp"
-                                class="form-control @error('gambar') is-invalid @enderror">
-                            @error('gambar')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                            <small class="text-muted d-block mt-1">Format: JPG, PNG, WebP. Maksimal 2 MB.</small>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">ISBN</label>
-                            <input type="text" name="isbn" value="{{ old('isbn') }}"
-                                placeholder="opsional" class="form-control">
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Sinopsis</label>
-                            <textarea name="sinopsis" rows="3"
-                                class="form-control" placeholder="opsional">{{ old('sinopsis') }}</textarea>
-                        </div>
-                    </div>
+/**
+ * ADMIN - CRUD BUKU
+ */
+class BukuController extends Controller
+{
+    /**
+     * Daftar buku + pencarian.
+     */
+    public function index(Request $request)
+    {
+        $search = trim((string) $request->input('search'));
 
-                    <div class="d-flex gap-2 mt-4">
-                        <button type="submit" class="btn btn-navy"><i class="bi bi-save"></i> Simpan</button>
-                        <a href="{{ route('admin.buku.index') }}" class="btn btn-outline-secondary">Batal</a>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-@endsection
+        $bukus = Buku::query()
+            ->when($search !== '', function ($q) use ($search) {
+                $q->where(function ($w) use ($search) {
+                    $w->where('judul_buku', 'like', "%{$search}%")
+                        ->orWhere('pengarang', 'like', "%{$search}%")
+                        ->orWhere('penerbit', 'like', "%{$search}%")
+                        ->orWhere('kategori', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('judul_buku')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('bukus.index', compact('bukus', 'search'));
+    }
+
+    /**
+     * Form tambah buku.
+     */
+    public function create()
+    {
+        return view('bukus.create');
+    }
+
+    /**
+     * Simpan buku baru.
+     */
+    public function store(Request $request)
+    {
+        $data = $this->validateBuku($request);
+
+        // Upload cover ke Cloudinary jika ada.
+        $data['gambar'] = $this->uploadCover($request);
+
+        Buku::create($data);
+
+        return redirect()
+            ->route('admin.buku.index')
+            ->with('success', 'Data buku berhasil ditambahkan.');
+    }
+
+    /**
+     * Tampilkan detail buku.
+     */
+    public function show(Buku $buku)
+    {
+        $totalDipinjam = $buku->transaksi()->count();
+
+        $sedangDipinjam = $buku->transaksi()
+            ->where('status', 'dipinjam')
+            ->count();
+
+        return view(
+            'bukus.show',
+            compact('buku', 'totalDipinjam', 'sedangDipinjam')
+        );
+    }
+
+    /**
+     * Form edit buku.
+     */
+    public function edit(Buku $buku)
+    {
+        return view('bukus.edit', compact('buku'));
+    }
+
+    /**
+     * Update data buku.
+     */
+    public function update(Request $request, Buku $buku)
+    {
+        $data = $this->validateBuku($request);
+
+        // Jika ada cover baru, upload ke Cloudinary.
+        if ($request->hasFile('gambar')) {
+            $data['gambar'] = $this->uploadCover($request);
+
+            // Hapus cover lama jika masih berupa file lokal.
+            $this->hapusCoverLama($buku->gambar);
+        }
+
+        $buku->update($data);
+
+        return redirect()
+            ->route('admin.buku.index')
+            ->with('success', 'Data buku berhasil diperbarui.');
+    }
+
+    /**
+     * Hapus buku.
+     */
+    public function destroy(Buku $buku)
+    {
+        // Buku yang pernah/sedang dipinjam tidak boleh dihapus.
+        if ($buku->transaksi()->exists()) {
+            return redirect()
+                ->route('admin.buku.index')
+                ->with(
+                    'error',
+                    'Buku tidak dapat dihapus karena sudah memiliki data transaksi peminjaman.'
+                );
+        }
+
+        // Hapus cover lokal jika ada.
+        $this->hapusCoverLama($buku->gambar);
+
+        $buku->delete();
+
+        return redirect()
+            ->route('admin.buku.index')
+            ->with('success', 'Data buku berhasil dihapus.');
+    }
+
+    /**
+     * Validasi data buku.
+     */
+    private function validateBuku(Request $request): array
+    {
+        return $request->validate([
+            'judul_buku' => 'required|string|max:255',
+            'pengarang' => 'required|string|max:255',
+            'penerbit' => 'nullable|string|max:255',
+            'tahun_terbit' => 'nullable|integer|min:1900|max:' . date('Y'),
+            'kategori' => 'nullable|string|max:100',
+            'stok' => 'required|integer|min:0',
+            'isbn' => 'nullable|string|max:255',
+            'sinopsis' => 'nullable|string',
+            'gambar' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ]);
+    }
+
+    /**
+     * Upload cover buku ke Cloudinary.
+     *
+     * Mengembalikan URL HTTPS Cloudinary.
+     */
+    private function uploadCover(Request $request): ?string
+    {
+        if (! $request->hasFile('gambar')) {
+            return null;
+        }
+
+        $file = $request->file('gambar');
+
+        // Pastikan file benar-benar diterima Laravel.
+        if (! $file->isValid()) {
+            throw new \RuntimeException(
+                'File gambar gagal diupload: ' . $file->getErrorMessage()
+            );
+        }
+
+        $cloudinary = new Cloudinary([
+            'cloud' => [
+                'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+                'api_key' => env('CLOUDINARY_API_KEY'),
+                'api_secret' => env('CLOUDINARY_API_SECRET'),
+            ],
+        ]);
+
+        $result = $cloudinary->uploadApi()->upload(
+            $file->getRealPath(),
+            [
+                'folder' => 'perpustakaan/buku',
+                'resource_type' => 'image',
+            ]
+        );
+
+        // Pastikan Cloudinary mengembalikan URL.
+        if (empty($result['secure_url'])) {
+            throw new \RuntimeException(
+                'Upload Cloudinary gagal: secure_url tidak ditemukan.'
+            );
+        }
+
+        return $result['secure_url'];
+    }
+
+    /**
+     * Hapus cover lama.
+     *
+     * Cover Cloudinary tidak dihapus.
+     * Cover lokal lama tetap bisa dihapus.
+     */
+    private function hapusCoverLama(?string $gambar): void
+    {
+        if (! $gambar) {
+            return;
+        }
+
+        // Jika sudah URL Cloudinary, jangan hapus dari storage lokal.
+        if (
+            str_starts_with($gambar, 'http://') ||
+            str_starts_with($gambar, 'https://')
+        ) {
+            return;
+        }
+
+        // Hapus file lokal lama.
+        if (Storage::disk('public')->exists($gambar)) {
+            Storage::disk('public')->delete($gambar);
+        }
+    }
+}

@@ -1,6 +1,6 @@
 @extends('layouts.site')
 
-@section('title', 'Beranda — Perpustakaan Sekolah')
+@section('title', 'Beranda — SMK Muhammadiyah 2 Bantul')
 
 @section('content')
     {{-- ================= HERO : teks KIRI, ilustrasi KANAN ================= --}}
@@ -8,14 +8,15 @@
         <div class="site-container">
             <div class="row align-items-center g-4 g-lg-5">
                 <div class="col-lg-6">
-                    <span class="hero-eyebrow"><i class="bi bi-stars"></i> Perpustakaan Digital Sekolah</span>
+                    <span class="hero-eyebrow"><i class="bi bi-stars"></i> Perpustakaan Digital SMK Mudaba</span>
                     <h1 class="hero-title">
                         Selamat Datang di<br>
-                        <span class="hl">Perpustakaan Sekolah</span>
+                        <span class="hl">SMK Muhammadiyah 2 Bantul</span>
                     </h1>
                     <p class="hero-subtitle">
-                        Jendela ilmu bagi siswa dan guru — cari buku, pinjam dengan mudah,
-                        dan tingkatkan minat baca.
+                        Menjadi bagian dari pendidikan kejuruan yang membentuk lulusan berkarakter,
+                        kompeten, cerdas, dan berdaya saing di era digital — cari buku, pinjam
+                        dengan mudah, dan tingkatkan minat baca.
                     </p>
 
                     {{-- Search bar --}}
@@ -158,7 +159,7 @@
                                 <i class="bi bi-person"></i>
                                 <input type="text" name="login" id="bh-login" value="{{ old('login') }}"
                                     class="form-control @error('login') is-invalid @enderror"
-                                    placeholder="cth: budi atau budi@sekolah.sch.id" required autofocus>
+                                    placeholder="cth: budi atau budi@smkmudaba.sch.id" required autofocus>
                             </div>
                         </div>
                         <div class="mb-4">

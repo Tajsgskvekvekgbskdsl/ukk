@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Anggota;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,6 +20,10 @@ class AuthController extends Controller
 
     /**
      * Handle login request (username ATAU email).
+     * Mendukung dua skenario:
+     * 1. Password sudah Bcrypt → flow normal Laravel.
+     * 2. Password masih plaintext (dibuat via phpMyAdmin/SQL) → auto-migrasi ke Bcrypt
+     *    saat login berhasil, ala WordPress. Plaintext TIDAK pernah tersimpan permanen.
      */
     public function login(Request $request)
     {
@@ -30,53 +33,67 @@ class AuthController extends Controller
         ]);
 
         $field = filter_var($credentials['login'], FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        $inputPassword = $credentials['password'];
 
-        $attempt = [
-            $field => $credentials['login'],
-            'password' => $credentials['password'],
-        ];
-
+        // ========== FLOW 1: Password sudah Bcrypt (normal) ==========
         try {
-            $success = Auth::attempt($attempt, $request->boolean('remember'));
+            if (Auth::attempt([$field => $credentials['login'], 'password' => $inputPassword], $request->boolean('remember'))) {
+                return $this->afterLogin(Auth::user(), $request);
+            }
         } catch (\RuntimeException $e) {
-            // Password di database BUKAN hash Bcrypt (mis. diisi manual via
-            // phpMyAdmin/SQL tanpa Hash::make). Jangan tampilkan error 500;
-            // beri pesan yang jelas dan arahkan perbaiki data di database.
-            return back()->withErrors([
-                'login' => 'Login gagal: data password akun ini di database bukan hash Bcrypt yang valid. '
-                    . 'Perbarui kolom password melalui phpMyAdmin dengan hash dari bcrypt generator '
-                    . 'atau minta admin lain meresetnya via perintah Hash::make().',
-            ])->onlyInput('login');
+            // Password BUKAN hash Bcrypt — kemungkinan plaintext.
+            // Lanjut ke Flow 2 di bawah.
         }
 
-        if ($success) {
-            $user = Auth::user();
+        // ========== FLOW 2: Password plaintext → auto-migrasi ==========
+        // Hanya jalan kalau ada user dengan field tersebut DAN passwordnya
+        // TIDAK diawali '$2y$' (bukan Bcrypt).
+        $user = User::where($field, $credentials['login'])->first();
 
-            // Status akun: kolom status di tabel users (default 'aktif').
-            // Akun non-aktif tidak boleh tetap berada dalam session.
-            if (trim((string) $user->status) !== 'aktif') {
-                Auth::logout();
-                $request->session()->invalidate();
+        if ($user && !str_starts_with((string) $user->password, '$2y$')) {
+            // Cek apakah plaintext cocok
+            if (hash_equals((string) $user->password, $inputPassword)) {
+                // Auto-migrasi: plaintext → Bcrypt
+                $user->password = Hash::make($inputPassword);
+                $user->save();
 
-                return back()->withErrors([
-                    'login' => 'Akun Anda tidak aktif. Hubungi administrator perpustakaan.',
-                ])->onlyInput('login');
+                // Login dengan user yang sudah di-upgrade
+                Auth::login($user, $request->boolean('remember'));
+                return $this->afterLogin($user, $request);
             }
-
-            $request->session()->regenerate();
-
-            if ($user->isAdmin()) {
-                return redirect()->intended(route('admin.dashboard'))
-                    ->with('success', 'Selamat datang, Admin!');
-            }
-
-            return redirect()->intended(route('katalog'))
-                ->with('success', 'Selamat datang di Perpustakaan Sekolah Digital!');
         }
 
+        // ========== GAGAL: password salah atau format tidak dikenali ==========
         return back()->withErrors([
             'login' => 'Username/email atau password salah.',
         ])->onlyInput('login');
+    }
+
+    /**
+     * Logika setelah login berhasil (cek status + redirect berdasarkan role).
+     */
+    private function afterLogin(User $user, Request $request)
+    {
+        // Status akun: kolom status di tabel users (default 'aktif').
+        // Akun non-aktif tidak boleh tetap berada dalam session.
+        if (trim((string) $user->status) !== 'aktif') {
+            Auth::logout();
+            $request->session()->invalidate();
+
+            return back()->withErrors([
+                'login' => 'Akun Anda tidak aktif. Hubungi administrator perpustakaan.',
+            ])->onlyInput('login');
+        }
+
+        $request->session()->regenerate();
+
+        if ($user->isAdmin()) {
+            return redirect()->intended(route('admin.dashboard'))
+                ->with('success', 'Selamat datang, Admin!');
+        }
+
+        return redirect()->intended(route('katalog'))
+            ->with('success', 'Selamat datang di Perpustakaan Sekolah Digital!');
     }
 
     /**

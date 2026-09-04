@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 /**
@@ -13,21 +12,21 @@ class ProfileController extends Controller
 {
     public function show()
     {
-        $user = Auth::user()->load('anggota');
+        $user = $this->authUser();
 
         return view('profile.index', compact('user'));
     }
 
     public function edit()
     {
-        $user = Auth::user()->load('anggota');
+        $user = $this->authUser();
 
         return view('profile.edit', compact('user'));
     }
 
     public function update(Request $request)
     {
-        $user = Auth::user();
+        $user = $this->authUser();
 
         $data = $request->validate([
             'nama_lengkap' => 'required|string|max:255',
@@ -60,14 +59,26 @@ class ProfileController extends Controller
 
     public function changePassword(Request $request)
     {
-        $user = Auth::user();
+        $user = $this->authUser();
 
         $data = $request->validate([
             'current_password' => 'required|string',
             'password' => 'required|string|min:6|confirmed',
         ]);
 
-        if (! Hash::check($data['current_password'], $user->password)) {
+        // Password di database mungkin masih plaintext (dibuat via phpMyAdmin/SQL).
+        // BcryptHasher::check() melempar RuntimeException untuk nilai non-Bcrypt,
+        // sehingga harus ditangani agar tidak 500.
+        $stored = (string) $user->password;
+
+        if (str_starts_with($stored, '$2y$')) {
+            $passwordBenar = Hash::check($data['current_password'], $stored);
+        } else {
+            // Format lama (plaintext): bandingkan langsung, hash_equals anti timing-attack.
+            $passwordBenar = hash_equals($stored, $data['current_password']);
+        }
+
+        if (! $passwordBenar) {
             return back()->withErrors([
                 'current_password' => 'Password saat ini salah.',
             ]);

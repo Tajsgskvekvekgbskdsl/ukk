@@ -118,10 +118,14 @@ class ReportController extends Controller
         $transaksis = Transaksi::query()
             ->with(['anggota.user', 'buku'])
             ->when($search !== '', function ($q) use ($search) {
-                $q->whereHas('anggota', function ($a) use ($search) {
-                    $a->where('nama', 'like', "%{$search}%");
-                })->orWhereHas('buku', function ($b) use ($search) {
-                    $b->where('judul_buku', 'like', "%{$search}%");
+                // PENTING: kondisi OR harus dibungkus closure agar tidak
+                // merusak presedensi filter tanggal (WHERE ... AND ...).
+                $q->where(function ($w) use ($search) {
+                    $w->whereHas('anggota', function ($a) use ($search) {
+                        $a->where('nama', 'like', "%{$search}%");
+                    })->orWhereHas('buku', function ($b) use ($search) {
+                        $b->where('judul_buku', 'like', "%{$search}%");
+                    });
                 });
             })
             ->when($dari, fn ($q) => $q->whereDate('tgl_pinjam', '>=', $dari))
@@ -146,10 +150,14 @@ class ReportController extends Controller
             ->with(['anggota.user', 'buku'])
             ->whereNotNull('tgl_kembali')
             ->when($search !== '', function ($q) use ($search) {
-                $q->whereHas('anggota', function ($a) use ($search) {
-                    $a->where('nama', 'like', "%{$search}%");
-                })->orWhereHas('buku', function ($b) use ($search) {
-                    $b->where('judul_buku', 'like', "%{$search}%");
+                // PENTING: kondisi OR harus dibungkus closure agar tidak
+                // merusak presedensi filter tanggal (WHERE ... AND ...).
+                $q->where(function ($w) use ($search) {
+                    $w->whereHas('anggota', function ($a) use ($search) {
+                        $a->where('nama', 'like', "%{$search}%");
+                    })->orWhereHas('buku', function ($b) use ($search) {
+                        $b->where('judul_buku', 'like', "%{$search}%");
+                    });
                 });
             })
             ->when($dari, fn ($q) => $q->whereDate('tgl_kembali', '>=', $dari))

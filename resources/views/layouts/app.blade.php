@@ -142,7 +142,7 @@
     <!-- ============ SIDEBAR ============ -->
     <div class="sidebar" id="adminSidebar">
         <div class="brand">
-            <i class="bi bi-mortarboard-fill fs-4"></i> Perpustakaan
+            <i class="bi bi-mortarboard-fill fs-4"></i> SMK Mudaba
             <small>PANEL ADMIN</small>
         </div>
 
