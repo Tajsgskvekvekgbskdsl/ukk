@@ -3,16 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Buku;
+use Cloudinary\Cloudinary;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * ADMIN - CRUD BUKU (tabel buku, skema ERD).
+ * ADMIN - CRUD BUKU
  */
 class BukuController extends Controller
 {
     /**
-     * Daftar buku + search.
+     * Daftar buku + pencarian.
      */
     public function index(Request $request)
     {
@@ -34,74 +35,100 @@ class BukuController extends Controller
         return view('bukus.index', compact('bukus', 'search'));
     }
 
+    /**
+     * Form tambah buku.
+     */
     public function create()
     {
         return view('bukus.create');
     }
 
+    /**
+     * Simpan buku baru.
+     */
     public function store(Request $request)
     {
         $data = $this->validateBuku($request);
 
-        // Upload cover jika ada.
         $data['gambar'] = $this->uploadCover($request);
 
         Buku::create($data);
 
-        return redirect()->route('admin.buku.index')
+        return redirect()
+            ->route('admin.buku.index')
             ->with('success', 'Data buku berhasil ditambahkan.');
     }
 
+    /**
+     * Tampilkan detail buku.
+     */
     public function show(Buku $buku)
     {
-        // Muat statistik pinjam untuk halaman detail.
         $totalDipinjam = $buku->transaksi()->count();
-        $sedangDipinjam = $buku->transaksi()->where('status', 'dipinjam')->count();
 
-        return view('bukus.show', compact('buku', 'totalDipinjam', 'sedangDipinjam'));
+        $sedangDipinjam = $buku->transaksi()
+            ->where('status', 'dipinjam')
+            ->count();
+
+        return view(
+            'bukus.show',
+            compact('buku', 'totalDipinjam', 'sedangDipinjam')
+        );
     }
 
+    /**
+     * Form edit buku.
+     */
     public function edit(Buku $buku)
     {
         return view('bukus.edit', compact('buku'));
     }
 
+    /**
+     * Update data buku.
+     */
     public function update(Request $request, Buku $buku)
     {
         $data = $this->validateBuku($request);
 
-        // Jika cover baru diunggah, hapus cover lama lalu simpan yang baru.
         if ($request->hasFile('gambar')) {
-            $this->hapusCoverLama($buku->gambar);
             $data['gambar'] = $this->uploadCover($request);
+
+            $this->hapusCoverLama($buku->gambar);
         }
 
         $buku->update($data);
 
-        return redirect()->route('admin.buku.index')
+        return redirect()
+            ->route('admin.buku.index')
             ->with('success', 'Data buku berhasil diperbarui.');
     }
 
+    /**
+     * Hapus buku.
+     */
     public function destroy(Buku $buku)
     {
-        // Buku yang pernah/sedang dipinjam tidak boleh dihapus
-        // agar riwayat transaksi tetap utuh.
         if ($buku->transaksi()->exists()) {
-            return redirect()->route('admin.buku.index')
-                ->with('error', 'Buku tidak dapat dihapus karena sudah memiliki data transaksi peminjaman.');
+            return redirect()
+                ->route('admin.buku.index')
+                ->with(
+                    'error',
+                    'Buku tidak dapat dihapus karena sudah memiliki data transaksi peminjaman.'
+                );
         }
 
-        // Hapus file cover dari storage jika ada.
         $this->hapusCoverLama($buku->gambar);
 
         $buku->delete();
 
-        return redirect()->route('admin.buku.index')
+        return redirect()
+            ->route('admin.buku.index')
             ->with('success', 'Data buku berhasil dihapus.');
     }
 
     /**
-     * Validasi data buku. Stok tidak boleh negatif.
+     * Validasi data buku.
      */
     private function validateBuku(Request $request): array
     {
@@ -119,10 +146,7 @@ class BukuController extends Controller
     }
 
     /**
-     * Unggah file cover ke disk "public" di bawah folder "buku/".
-     * Nama file diacak agar tidak bertabrakan.
-     * Mengembalikan path relatif (misal: buku/abc123.jpg) untuk disimpan ke DB,
-     * atau null jika tidak ada file.
+     * Upload cover buku ke Cloudinary.
      */
     private function uploadCover(Request $request): ?string
     {
@@ -130,20 +154,46 @@ class BukuController extends Controller
             return null;
         }
 
-        // Store sebagai nama acak di folder "buku" pada disk "public".
-        $path = $request->file('gambar')->store('buku', 'public');
+        $cloudinary = new Cloudinary([
+            'cloud' => [
+                'cloud_name' => config('services.cloudinary.cloud_name'),
+                'api_key' => config('services.cloudinary.api_key'),
+                'api_secret' => config('services.cloudinary.api_secret'),
+            ],
+        ]);
 
-        // $path sudah berupa path relatif (buku/xyz.jpg) — cocok untuk asset('storage/'.$path).
-        return $path;
+        $result = $cloudinary->uploadApi()->upload(
+            $request->file('gambar')->getRealPath(),
+            [
+                'folder' => 'perpustakaan/buku',
+                'resource_type' => 'image',
+            ]
+        );
+
+        return $result['secure_url'] ?? null;
     }
 
     /**
-     * Hapus file cover lama dari storage.
-     * Aman dipanggil berulang kali karena cek eksistensi.
+     * Hapus cover lama.
+     *
+     * Cover Cloudinary tidak dihapus.
+     * Cover lokal tetap dihapus dari storage.
      */
     private function hapusCoverLama(?string $gambar): void
     {
-        if ($gambar && Storage::disk('public')->exists($gambar)) {
+        if (! $gambar) {
+            return;
+        }
+
+        // Kalau URL Cloudinary, jangan hapus dari storage lokal.
+        if (
+            str_starts_with($gambar, 'http://') ||
+            str_starts_with($gambar, 'https://')
+        ) {
+            return;
+        }
+
+        if (Storage::disk('public')->exists($gambar)) {
             Storage::disk('public')->delete($gambar);
         }
     }
