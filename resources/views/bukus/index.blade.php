@@ -193,11 +193,5 @@
             </tbody>
         </table>
     </div>
-
-    @if($bukus->hasPages())
-        <div class="card-footer bg-white">
-            {{ $bukus->links() }}
-        </div>
-    @endif
 </div>
 @endsection
