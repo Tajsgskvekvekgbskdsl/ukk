@@ -116,26 +116,32 @@
                             @endif
                         </td>
 
+                        {{-- JUDUL --}}
                         <td class="fw-semibold">
                             {{ $buku->judul_buku }}
                         </td>
 
+                        {{-- PENGARANG --}}
                         <td>
                             {{ $buku->pengarang }}
                         </td>
 
+                        {{-- PENERBIT --}}
                         <td>
                             {{ $buku->penerbit ?? '-' }}
                         </td>
 
+                        {{-- TAHUN --}}
                         <td>
                             {{ $buku->tahun_terbit ?? '-' }}
                         </td>
 
+                        {{-- KATEGORI --}}
                         <td>
                             {{ $buku->kategori ? strtoupper($buku->kategori) : '-' }}
                         </td>
 
+                        {{-- STOK --}}
                         <td class="text-center">
                             <span
                                 class="badge {{ $buku->stok > 0 ? 'bg-success' : 'bg-secondary' }}"
@@ -154,16 +160,16 @@
                                 {{-- DETAIL --}}
                                 <a
                                     href="{{ route('admin.buku.show', $buku) }}"
-                                    class="btn btn-outline-info"
+                                    class="btn btn-sm btn-outline-info"
                                     title="Detail"
                                     style="
-                                        width:52px;
-                                        height:52px;
+                                        width:34px;
+                                        height:34px;
+                                        padding:0;
                                         display:flex;
                                         align-items:center;
                                         justify-content:center;
-                                        border-radius:10px 0 0 10px;
-                                        margin:0;
+                                        border-radius:6px 0 0 6px;
                                     "
                                 >
                                     <i class="bi bi-eye"></i>
@@ -172,16 +178,17 @@
                                 {{-- EDIT --}}
                                 <a
                                     href="{{ route('admin.buku.edit', $buku) }}"
-                                    class="btn btn-outline-warning"
+                                    class="btn btn-sm btn-outline-warning"
                                     title="Edit"
                                     style="
-                                        width:52px;
-                                        height:52px;
+                                        width:34px;
+                                        height:34px;
+                                        padding:0;
                                         display:flex;
                                         align-items:center;
                                         justify-content:center;
                                         border-radius:0;
-                                        margin:0 0 0 -1px;
+                                        margin-left:-1px;
                                     "
                                 >
                                     <i class="bi bi-pencil"></i>
@@ -203,16 +210,16 @@
 
                                     <button
                                         type="submit"
-                                        class="btn btn-outline-danger"
+                                        class="btn btn-sm btn-outline-danger"
                                         title="Hapus"
                                         style="
-                                            width:52px;
-                                            height:52px;
+                                            width:34px;
+                                            height:34px;
+                                            padding:0;
                                             display:flex;
                                             align-items:center;
                                             justify-content:center;
-                                            border-radius:0 10px 10px 0;
-                                            margin:0;
+                                            border-radius:0 6px 6px 0;
                                         "
                                     >
                                         <i class="bi bi-trash"></i>
@@ -236,5 +243,11 @@
             </tbody>
         </table>
     </div>
+
+    @if($bukus->hasPages())
+        <div class="card-footer bg-white">
+            {{ $bukus->links() }}
+        </div>
+    @endif
 </div>
 @endsection
