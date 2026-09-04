@@ -71,7 +71,12 @@
                                 <img
                                     src="{{ $buku->gambar }}"
                                     alt="Cover {{ $buku->judul_buku }}"
-                                    style="width:40px; height:55px; object-fit:cover; border-radius:4px;"
+                                    style="
+                                        width:40px;
+                                        height:55px;
+                                        object-fit:cover;
+                                        border-radius:4px;
+                                    "
                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';"
                                 >
 
@@ -139,30 +144,59 @@
                             </span>
                         </td>
 
+                        {{-- AKSI --}}
                         <td class="text-center">
-                            <div class="btn-group btn-group-sm">
+                            <div
+                                class="d-inline-flex align-items-center"
+                                style="margin:0; padding:0;"
+                            >
 
+                                {{-- DETAIL --}}
                                 <a
                                     href="{{ route('admin.buku.show', $buku) }}"
                                     class="btn btn-outline-info"
                                     title="Detail"
+                                    style="
+                                        width:52px;
+                                        height:52px;
+                                        display:flex;
+                                        align-items:center;
+                                        justify-content:center;
+                                        border-radius:10px 0 0 10px;
+                                        margin:0;
+                                    "
                                 >
                                     <i class="bi bi-eye"></i>
                                 </a>
 
+                                {{-- EDIT --}}
                                 <a
                                     href="{{ route('admin.buku.edit', $buku) }}"
                                     class="btn btn-outline-warning"
                                     title="Edit"
+                                    style="
+                                        width:52px;
+                                        height:52px;
+                                        display:flex;
+                                        align-items:center;
+                                        justify-content:center;
+                                        border-radius:0;
+                                        margin:0 0 0 -1px;
+                                    "
                                 >
                                     <i class="bi bi-pencil"></i>
                                 </a>
 
+                                {{-- HAPUS --}}
                                 <form
                                     method="POST"
                                     action="{{ route('admin.buku.destroy', $buku) }}"
                                     onsubmit="return confirm('Yakin hapus buku ini?');"
-                                    class="d-inline"
+                                    style="
+                                        display:flex;
+                                        margin:0 0 0 -1px;
+                                        padding:0;
+                                    "
                                 >
                                     @csrf
                                     @method('DELETE')
@@ -171,6 +205,15 @@
                                         type="submit"
                                         class="btn btn-outline-danger"
                                         title="Hapus"
+                                        style="
+                                            width:52px;
+                                            height:52px;
+                                            display:flex;
+                                            align-items:center;
+                                            justify-content:center;
+                                            border-radius:0 10px 10px 0;
+                                            margin:0;
+                                        "
                                     >
                                         <i class="bi bi-trash"></i>
                                     </button>
