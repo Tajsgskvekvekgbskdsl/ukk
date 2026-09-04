@@ -27,24 +27,43 @@ class Buku extends Model
     ];
 
     /**
-     * Akses URL publik cover buku.
-     * Jika belum ada gambar, mengembalikan null agar view
-     * dapat menampilkan placeholder SVG berbasis nama.
+     * URL cover buku.
+     *
+     * Jika gambar berupa URL Cloudinary,
+     * langsung gunakan URL tersebut.
+     *
+     * Jika gambar berupa path lokal,
+     * gunakan storage/public.
      */
     public function getUrlCoverAttribute(): ?string
     {
-        if (! $this->gambar) {
+        if (empty($this->gambar)) {
             return null;
         }
 
-        return asset('storage/' . $this->gambar);
+        $gambar = trim($this->gambar);
+
+        // Cover dari Cloudinary / URL eksternal
+        if (
+            str_starts_with($gambar, 'https://') ||
+            str_starts_with($gambar, 'http://')
+        ) {
+            return $gambar;
+        }
+
+        // Cover lokal
+        return asset('storage/' . ltrim($gambar, '/'));
     }
 
     /**
-     * ERD: buku 1 -- N transaksi.
+     * Relasi buku dengan transaksi.
      */
     public function transaksi(): HasMany
     {
-        return $this->hasMany(Transaksi::class, 'id_buku', 'id_buku');
+        return $this->hasMany(
+            Transaksi::class,
+            'id_buku',
+            'id_buku'
+        );
     }
 }
