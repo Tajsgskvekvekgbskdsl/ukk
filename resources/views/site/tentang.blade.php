@@ -1,12 +1,12 @@
 @extends('layouts.site')
 
-@section('title', 'Tentang SMK Muhammadiyah 2 Bantul')
+@section('title', 'Tentang Perpustakaan')
 
 @section('content')
     <header class="page-header">
         <div class="site-container">
-            <h1><i class="bi bi-info-circle me-2" style="color:#16C94A;"></i>Tentang SMK Muhammadiyah 2 Bantul</h1>
-            <p>Sekolah kejuruan swasta di Kabupaten Bantul, Daerah Istimewa Yogyakarta.</p>
+            <h1><i class="bi bi-info-circle me-2" style="color:#16C94A;"></i>Tentang Perpustakaan</h1>
+            <p>Sistem Informasi Perpustakaan — katalog daring, peminjaman, dan pengembalian buku.</p>
         </div>
     </header>
 
@@ -14,14 +14,11 @@
         <div class="card mb-4" style="box-shadow: var(--shadow-halus);">
             <div class="card-body p-4 p-md-5">
                 <p class="mb-0" style="font-size:1.02rem; max-width: 820px;">
-                    SMK Muhammadiyah 2 Bantul (SMK Mudaba) merupakan sekolah kejuruan swasta di
-                    Kabupaten Bantul, Daerah Istimewa Yogyakarta yang bernaung di bawah Pimpinan
-                    Wilayah Muhammadiyah Provinsi DIY. Sekolah menyelenggarakan pendidikan kejuruan
-                    dengan pengembangan kompetensi, karakter, dan kesiapan peserta didik menghadapi
-                    dunia kerja serta era digital. Perpustakaan sekolah menjadi pusat sumber belajar
-                    yang melayani seluruh siswa, guru, dan tenaga kependidikan — koleksi buku pelajaran,
-                    fiksi, teknologi, dan referensi umum tersedia lewat katalog daring pada website ini
-                    untuk mendukung proses belajar mengajar serta menumbuhkan minat baca.
+                    Perpustakaan adalah aplikasi yang membantu pengelolaan koleksi buku —
+                    mulai dari pencarian lewat katalog daring, pendaftaran anggota, hingga
+                    pencatatan peminjaman dan pengembalian. Koleksi buku pelajaran, fiksi,
+                    teknologi, dan referensi umum tersedia untuk seluruh anggota dalam
+                    rangka mendukung proses belajar serta menumbuhkan minat baca.
                 </p>
             </div>
         </div>

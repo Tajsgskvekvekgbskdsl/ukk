@@ -1,6 +1,6 @@
 @extends('layouts.site')
 
-@section('title', 'Beranda — SMK Muhammadiyah 2 Bantul')
+@section('title', 'Beranda — Perpustakaan')
 
 @section('content')
     {{-- ================= HERO : teks KIRI, ilustrasi KANAN ================= --}}
@@ -8,15 +8,15 @@
         <div class="site-container">
             <div class="row align-items-center g-4 g-lg-5">
                 <div class="col-lg-6">
-                    <span class="hero-eyebrow"><i class="bi bi-stars"></i> Perpustakaan Digital SMK Mudaba</span>
+                    <span class="hero-eyebrow"><i class="bi bi-stars"></i> Sistem Informasi Perpustakaan</span>
                     <h1 class="hero-title">
                         Selamat Datang di<br>
-                        <span class="hl">SMK Muhammadiyah 2 Bantul</span>
+                        <span class="hl">Perpustakaan</span>
                     </h1>
                     <p class="hero-subtitle">
-                        Menjadi bagian dari pendidikan kejuruan yang membentuk lulusan berkarakter,
-                        kompeten, cerdas, dan berdaya saing di era digital — cari buku, pinjam
-                        dengan mudah, dan tingkatkan minat baca.
+                        Cari buku lewat katalog daring, pinjam dengan mudah, dan
+                        tingkatkan minat baca — semua dalam satu aplikasi
+                        perpustakaan.
                     </p>
 
                     {{-- Search bar --}}
@@ -159,7 +159,7 @@
                                 <i class="bi bi-person"></i>
                                 <input type="text" name="login" id="bh-login" value="{{ old('login') }}"
                                     class="form-control @error('login') is-invalid @enderror"
-                                    placeholder="cth: budi atau budi@smkmudaba.sch.id" required autofocus>
+                                    placeholder="cth: budi atau budi@email.com" required autofocus>
                             </div>
                         </div>
                         <div class="mb-4">

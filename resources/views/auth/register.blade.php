@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Anggota — SMK Muhammadiyah 2 Bantul</title>
+    <title>Daftar Anggota — Perpustakaan</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,7 +20,7 @@
             <div class="auth-card" style="max-width: 520px;">
                 <a href="{{ route('beranda') }}" class="auth-brand">
                     <span class="brand-mark"><i class="bi bi-book-half"></i></span>
-                    <span class="brand-text">SMK Mudaba</span>
+                    <span class="brand-text">Perpustakaan</span>
                 </a>
 
                 <h1 class="auth-title">Daftar Menjadi Anggota</h1>

@@ -8,7 +8,7 @@
         <div class="site-container d-flex flex-wrap align-items-center justify-content-between gap-3">
             <div>
                 <h1><i class="bi bi-collection me-2" style="color:#16C94A;"></i>Katalog Buku</h1>
-                <p>Jelajahi seluruh koleksi perpustakaan sekolah.</p>
+                <p>Jelajahi seluruh koleksi perpustakaan.</p>
             </div>
             <span class="chip" style="cursor:default;">
                 <i class="bi bi-books"></i> Total: {{ $bukus->total() }} judul

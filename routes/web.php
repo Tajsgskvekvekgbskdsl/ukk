@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 | WEBSITE PERPUSTAKAAN (publik + user)
 |--------------------------------------------------------------------------
-| Tampilan user = website perpustakaan sekolah (bukan dashboard admin).
+| Tampilan user = website perpustakaan (bukan dashboard admin).
 */
 Route::get('/', [KatalogController::class, 'beranda'])->name('beranda');
 Route::get('/katalog', [KatalogController::class, 'katalog'])->name('katalog');

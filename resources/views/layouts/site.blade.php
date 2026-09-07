@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'SMK Muhammadiyah 2 Bantul')</title>
+    <title>@yield('title', 'Perpustakaan')</title>
 
     {{-- Font: Inter (body) + Poppins (heading) --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,7 +22,7 @@
         <div class="site-container">
             <a class="site-brand me-auto" href="{{ route('beranda') }}">
                 <span class="brand-mark"><i class="bi bi-book-half"></i></span>
-                <span class="brand-text">SMK Mudaba</span>
+                <span class="brand-text">Perpustakaan</span>
             </a>
 
             <button class="navbar-toggler custom border-0" type="button"
@@ -102,12 +102,12 @@
                 <div class="col-md-5">
                     <div class="f-brand">
                         <span class="brand-mark"><i class="bi bi-book-half"></i></span>
-                        <span>SMK Muhammadiyah 2 Bantul</span>
+                        <span>Perpustakaan</span>
                     </div>
                     <p class="mb-0" style="max-width: 320px;">
-                        Sekolah kejuruan swasta di Kabupaten Bantul, DIY. Perpustakaan digital
-                        ini membantu siswa mencari buku lewat katalog daring, meminjam dengan
-                        mudah, dan meningkatkan minat baca bersama.
+                        Sistem Informasi Perpustakaan untuk mencari koleksi buku
+                        lewat katalog daring, meminjam dengan mudah, dan
+                        meningkatkan minat baca.
                     </p>
                 </div>
                 <div class="col-md-3 col-6">
@@ -120,13 +120,12 @@
                 <div class="col-md-4 col-6">
                     <h6>Kontak</h6>
                     <ul>
-                        <li><i class="bi bi-geo-alt me-2" style="color:#16C94A;"></i>Jl. Bejen, Bantul, Kab. Bantul, DIY 55711</li>
-                        <li class="mt-2"><i class="bi bi-envelope me-2" style="color:#16C94A;"></i><a href="mailto:smkmudaba02@gmail.com">smkmudaba02@gmail.com</a></li>
+                        <li><i class="bi bi-info-circle me-2" style="color:#16C94A;"></i>Hubungi petugas perpustakaan untuk bantuan lebih lanjut.</li>
                     </ul>
                 </div>
             </div>
             <div class="footer-bottom">
-                &copy; {{ date('Y') }} SMK Muhammadiyah 2 Bantul — Dibangun untuk siswa &amp; guru.
+                &copy; {{ date('Y') }} Perpustakaan — Sistem Informasi Perpustakaan.
             </div>
         </div>
     </footer>

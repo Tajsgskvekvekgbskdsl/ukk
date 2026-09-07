@@ -97,7 +97,7 @@ class UserTest extends TestCase
     {
         Buku::factory()->count(4)->create();
 
-        $this->get(route('beranda'))->assertOk()->assertSee('Perpustakaan Sekolah');
+                $this->get(route('beranda'))->assertOk()->assertSee('Perpustakaan');
         $this->get(route('katalog'))->assertOk();
     }
 

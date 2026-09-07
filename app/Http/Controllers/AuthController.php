@@ -93,7 +93,7 @@ class AuthController extends Controller
         }
 
         return redirect()->intended(route('katalog'))
-            ->with('success', 'Selamat datang di Perpustakaan Sekolah Digital!');
+            ->with('success', 'Selamat datang di Perpustakaan!');
     }
 
     /**
