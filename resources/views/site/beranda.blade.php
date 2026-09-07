@@ -1,6 +1,8 @@
 @extends('layouts.site')
 
-@section('title', 'Beranda — Perpustakaan')
+@section('title', 'Perpustakaan')
+
+@section('meta_description', 'Perpustakaan online untuk mencari koleksi buku, melihat informasi buku, dan mengakses layanan perpustakaan.')
 
 @section('content')
     {{-- ================= HERO : teks KIRI, ilustrasi KANAN ================= --}}
