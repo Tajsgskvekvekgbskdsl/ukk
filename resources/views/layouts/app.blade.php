@@ -99,6 +99,7 @@
         .sidebar .nav {
             padding: 10px 0;
             overflow-y: auto;
+            overflow-x: hidden;
         }
 
         .sidebar .nav-link {
@@ -126,6 +127,26 @@
             color: var(--gold);
             border-left-color: var(--gold);
             font-weight: 600;
+        }
+
+        /* ===== Dropdown vertikal menu Report: submenu muncul ke bawah, tidak ke samping ===== */
+        .report-submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height .25s ease;
+        }
+
+        .report-menu.open > .report-submenu {
+            max-height: 600px;
+        }
+
+        .report-chevron {
+            transition: transform .2s ease;
+            transform: rotate(-90deg);
+        }
+
+        .report-menu.open > .report-toggle .report-chevron {
+            transform: rotate(0);
         }
 
         .sidebar-footer {
@@ -461,50 +482,38 @@
                 </a>
             </li>
 
-            <li>
-                <a class="nav-link {{ request()->routeIs('admin.report.*') ? 'active' : '' }}"
-                   href="#reportMenu"
-                   data-bs-toggle="collapse"
-                   aria-expanded="{{ request()->routeIs('admin.report.*') ? 'true' : 'false' }}">
+            <li class="report-menu {{ request()->routeIs('admin.report.*') ? 'open' : '' }}">
+                <a class="nav-link {{ request()->routeIs('admin.report.*') ? 'active' : '' }} report-toggle"
+                   href="#"
+                   role="button"
+                   aria-expanded="{{ request()->routeIs('admin.report.*') ? 'true' : 'false' }}"
+                   aria-controls="reportSubmenu">
                     <i class="bi bi-file-earmark-bar-graph"></i> Report
+                    <i class="bi bi-chevron-down report-chevron ms-auto"></i>
                 </a>
 
-                <ul class="collapse list-unstyled small {{ request()->routeIs('admin.report.*') ? 'show' : '' }}"
-                    id="reportMenu"
+                                <ul class="report-submenu list-unstyled small"
+                    id="reportSubmenu"
                     style="background:rgba(22,201,74,.08);">
 
                     <li>
                         <a class="nav-link py-1 ps-5"
-                           href="{{ route('admin.report.dashboard') }}">
-                            Ringkasan
-                        </a>
-                    </li>
-
-                    <li>
-                        <a class="nav-link py-1 ps-5"
-                           href="{{ route('admin.report.buku') }}">
-                            Report Buku
-                        </a>
-                    </li>
-
-                    <li>
-                        <a class="nav-link py-1 ps-5"
-                           href="{{ route('admin.report.anggota') }}">
-                            Report Anggota
-                        </a>
-                    </li>
-
-                    <li>
-                        <a class="nav-link py-1 ps-5"
                            href="{{ route('admin.report.peminjaman') }}">
-                            Report Peminjaman
+                            Laporan Peminjaman
                         </a>
                     </li>
 
                     <li>
                         <a class="nav-link py-1 ps-5"
                            href="{{ route('admin.report.pengembalian') }}">
-                            Report Pengembalian
+                            Laporan Pengembalian
+                        </a>
+                    </li>
+
+                    <li>
+                        <a class="nav-link py-1 ps-5"
+                           href="{{ route('admin.report.dashboard') }}">
+                            Statistik Perpustarikan
                         </a>
                     </li>
 
@@ -641,6 +650,21 @@
                 sb.classList.remove('show');
             }
         });
+
+        /* ===== Dropdown vertikal menu Report (submenu muncul ke bawah) ===== */
+        (function () {
+            const menu = document.querySelector('#adminSidebar .report-menu');
+            if (!menu) return;
+            const toggle = menu.querySelector('.report-toggle');
+            const submenu = menu.querySelector('.report-submenu');
+
+            toggle.addEventListener('click', function (e) {
+                e.preventDefault();
+                const opened = menu.classList.toggle('open');
+                toggle.setAttribute('aria-expanded', opened ? 'true' : 'false');
+                submenu.style.maxHeight = opened ? (submenu.scrollHeight + 'px') : '0';
+            });
+        })();
     </script>
 
     @stack('scripts')
